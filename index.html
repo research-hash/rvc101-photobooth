@@ -411,6 +411,17 @@
             box-shadow: 0 5px 30px rgba(255, 215, 0, 0.6);
         }
 
+        .btn-info {
+            background: linear-gradient(45deg, var(--neon-pink), #ff4081);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.4);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 30px rgba(255, 0, 128, 0.6);
+        }
+
         .frame-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -524,6 +535,9 @@
                     
                     <!-- Frame 6: Sponsor -->
                     <div class="frame-overlay frame-sponsor" id="frame-sponsor"></div>
+                    
+                    <!-- Custom Frame -->
+                    <div class="frame-overlay frame-custom" id="frame-custom"></div>
                 </div>
             </div>
 
@@ -547,12 +561,19 @@
                         <div class="frame-btn" data-frame="frame-glitch">Glitch Style</div>
                         <div class="frame-btn" data-frame="frame-neon">Cyber Neon</div>
                         <div class="frame-btn" data-frame="frame-sponsor">Sponsor</div>
+                        <div class="frame-btn" data-frame="frame-custom" id="customFrameBtn" style="display: none;">Custom Frame</div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="customFrame">อัพโหลดเฟรมเอง (PNG/JPG)</label>
+                    <input type="file" id="customFrame" accept="image/*" style="padding: 8px;">
                 </div>
 
                 <button class="btn btn-primary" id="startCamera">📷 เปิดกล้อง</button>
                 <button class="btn btn-success" id="capturePhoto" style="display: none;">📸 ถ่ายภาพ</button>
                 <button class="btn btn-warning" id="downloadPhoto" style="display: none;">💾 ดาวน์โหลด PNG</button>
+                <button class="btn btn-info" id="sharePhoto" style="display: none;">📤 แชร์ภาพ</button>
             </div>
         </div>
 
@@ -572,6 +593,7 @@
     <script>
         let stream = null;
         let currentFrame = 'frame-rvc101-main';
+        let customFrameImage = null;
         
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -583,9 +605,49 @@
         const startCameraBtn = document.getElementById('startCamera');
         const capturePhotoBtn = document.getElementById('capturePhoto');
         const downloadPhotoBtn = document.getElementById('downloadPhoto');
+        const sharePhotoBtn = document.getElementById('sharePhoto');
+        const customFrameInput = document.getElementById('customFrame');
+        const customFrameBtn = document.getElementById('customFrameBtn');
         
         const nicknameInput = document.getElementById('nickname');
         const teamNameInput = document.getElementById('teamName');
+        
+        // Custom frame upload
+        customFrameInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        customFrameImage = img;
+                        customFrameBtn.style.display = 'block';
+                        
+                        // Auto-select custom frame
+                        document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
+                        customFrameBtn.classList.add('active');
+                        
+                        // Hide all frames and show custom
+                        document.querySelectorAll('.frame-overlay').forEach(frame => {
+                            frame.classList.remove('active');
+                        });
+                        currentFrame = 'frame-custom';
+                        document.getElementById(currentFrame).classList.add('active');
+                        
+                        // Update custom frame background
+                        const customFrameElement = document.getElementById('frame-custom');
+                        customFrameElement.style.backgroundImage = `url(${event.target.result})`;
+                        customFrameElement.style.backgroundSize = 'cover';
+                        customFrameElement.style.backgroundPosition = 'center';
+                        customFrameElement.style.backgroundRepeat = 'no-repeat';
+                        
+                        showCustomAlert('อัพโหลดเฟรมสำเร็จ! เฟรมของคุณพร้อมใช้งานแล้ว');
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
         
         // Frame selection
         document.querySelectorAll('.frame-btn').forEach(btn => {
@@ -654,7 +716,12 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             // Draw frame overlay
-            drawFrameOverlay(ctx, canvas.width, canvas.height);
+            if (currentFrame === 'frame-custom' && customFrameImage) {
+                // Draw custom frame
+                ctx.drawImage(customFrameImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                drawFrameOverlay(ctx, canvas.width, canvas.height);
+            }
             
             // Draw text overlay
             drawTextOverlay(ctx, nickname, teamName, canvas.width, canvas.height);
@@ -664,6 +731,7 @@
             preview.src = imageDataUrl;
             previewSection.style.display = 'block';
             downloadPhotoBtn.style.display = 'block';
+            sharePhotoBtn.style.display = 'block';
             
             // Scroll to preview
             previewSection.scrollIntoView({ behavior: 'smooth' });
@@ -676,6 +744,171 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
+        
+        // Share photo
+        sharePhotoBtn.addEventListener('click', async function() {
+            try {
+                // Convert canvas to blob
+                canvas.toBlob(async function(blob) {
+                    const fileName = `RVC101_${nicknameInput.value}_${teamNameInput.value}_${Date.now()}.png`;
+                    
+                    // Check if Web Share API is supported
+                    if (navigator.share && navigator.canShare) {
+                        const file = new File([blob], fileName, { type: 'image/png' });
+                        
+                        if (navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({
+                                    title: 'RVC101 Esports Challenge 2025',
+                                    text: `ภาพจาก RVC101 Esports Challenge 2025 - ${nicknameInput.value} (${teamNameInput.value})`,
+                                    files: [file]
+                                });
+                                showCustomAlert('แชร์ภาพสำเร็จ!');
+                            } catch (err) {
+                                if (err.name !== 'AbortError') {
+                                    fallbackShare(blob, fileName);
+                                }
+                            }
+                        } else {
+                            fallbackShare(blob, fileName);
+                        }
+                    } else {
+                        fallbackShare(blob, fileName);
+                    }
+                }, 'image/png');
+            } catch (err) {
+                showCustomAlert('เกิดข้อผิดพลาดในการแชร์ภาพ');
+            }
+        });
+        
+        function fallbackShare(blob, fileName) {
+            // Create a temporary URL for the image
+            const url = URL.createObjectURL(blob);
+            
+            // Create share modal
+            const shareModal = document.createElement('div');
+            shareModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const shareContent = document.createElement('div');
+            shareContent.style.cssText = `
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 2px solid #7b3fe4;
+                border-radius: 15px;
+                padding: 30px;
+                max-width: 500px;
+                text-align: center;
+                box-shadow: 0 0 50px rgba(123, 63, 228, 0.5);
+            `;
+            
+            shareContent.innerHTML = `
+                <h3 style="color: #00d4ff; margin-bottom: 20px;">แชร์ภาพของคุณ</h3>
+                <img src="${url}" style="max-width: 300px; max-height: 200px; border-radius: 10px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                    <button id="copyLink" style="
+                        background: linear-gradient(45deg, #7b3fe4, #00d4ff);
+                        color: white;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">📋 คัดลอกลิงก์</button>
+                    <button id="downloadShare" style="
+                        background: linear-gradient(45deg, #ffd700, #ffaa00);
+                        color: black;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">💾 ดาวน์โหลด</button>
+                    <button id="shareWhatsApp" style="
+                        background: linear-gradient(45deg, #25d366, #128c7e);
+                        color: white;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">📱 WhatsApp</button>
+                    <button id="shareFacebook" style="
+                        background: linear-gradient(45deg, #1877f2, #42a5f5);
+                        color: white;
+                        border: none;
+                        padding: 12px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">📘 Facebook</button>
+                </div>
+                <button id="closeShare" style="
+                    background: linear-gradient(45deg, #ff0080, #ff4081);
+                    color: white;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">ปิด</button>
+            `;
+            
+            shareModal.appendChild(shareContent);
+            document.body.appendChild(shareModal);
+            
+            // Event listeners for share options
+            document.getElementById('copyLink').addEventListener('click', async function() {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    this.textContent = '✅ คัดลอกแล้ว!';
+                    setTimeout(() => {
+                        this.textContent = '📋 คัดลอกลิงก์';
+                    }, 2000);
+                } catch (err) {
+                    showCustomAlert('ไม่สามารถคัดลอกลิงก์ได้');
+                }
+            });
+            
+            document.getElementById('downloadShare').addEventListener('click', function() {
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = url;
+                link.click();
+            });
+            
+            document.getElementById('shareWhatsApp').addEventListener('click', function() {
+                const text = encodeURIComponent(`ภาพจาก RVC101 Esports Challenge 2025 - ${nicknameInput.value} (${teamNameInput.value})`);
+                window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+            });
+            
+            document.getElementById('shareFacebook').addEventListener('click', function() {
+                const text = encodeURIComponent(`ภาพจาก RVC101 Esports Challenge 2025 - ${nicknameInput.value} (${teamNameInput.value})`);
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${text}`, '_blank', 'noopener,noreferrer');
+            });
+            
+            document.getElementById('closeShare').addEventListener('click', function() {
+                URL.revokeObjectURL(url);
+                document.body.removeChild(shareModal);
+            });
+            
+            // Close on backdrop click
+            shareModal.addEventListener('click', function(e) {
+                if (e.target === shareModal) {
+                    URL.revokeObjectURL(url);
+                    document.body.removeChild(shareModal);
+                }
+            });
+        }
         
         function drawFrameOverlay(ctx, width, height) {
             const frameData = getFrameData(currentFrame);
@@ -927,5 +1160,5 @@
         // Initialize default frame
         document.getElementById(currentFrame).classList.add('active');
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'993257b57170d024',t:'MTc2MTIzNDEyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'993264edb59e37d6',t:'MTc2MTIzNDY3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
