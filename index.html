@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVC101 Esports Challenge 2025 — Photo Booth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #0b0f1a 0%, #121622 100%);
+            color: white;
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #7b3fe4, #00ffe4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .camera-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(123, 63, 228, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .controls-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 228, 0.3);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .frame-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: bold;
+            color: #00ffe4;
+            text-shadow: 0 0 20px #00ffe4;
+            z-index: 10;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ffe4;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(123, 63, 228, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00ffe4;
+            box-shadow: 0 0 10px rgba(0, 255, 228, 0.3);
+        }
+
+
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #7b3fe4, #9d5ce8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #6a35d1, #8b4fd6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #00ffe4, #00d4b8);
+            color: #0b0f1a;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #00e6cc, #00bfa5);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+        }
+
+        .capture-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-group .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .result-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 228, 0.3);
+            margin-top: 30px;
+        }
+
+        .result-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .result-image {
+            flex: 1;
+        }
+
+        .result-image img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .result-actions {
+            flex: 0 0 250px;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .qr-container canvas {
+            border-radius: 8px;
+            background: white;
+            padding: 10px;
+        }
+
+        .privacy-notice {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .privacy-notice h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .accessibility-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .accessibility-controls .btn {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0b0f1a 0%, #121622 100%);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(123, 63, 228, 0.5);
+        }
+
+        .modal h3 {
+            color: #00ffe4;
+            margin-bottom: 20px;
+        }
+
+        .camera-error {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ff6b7a;
+        }
+
+        .camera-error h3 {
+            margin-bottom: 20px;
+        }
+
+        .camera-error ol {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .camera-error li {
+            margin-bottom: 10px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #00ffe4;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 1000;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .kiosk-mode {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .camera-section {
+                max-width: 100%;
+            }
+            
+            .result-content {
+                flex-direction: column;
+            }
+            
+            .result-actions {
+                flex: none;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .btn {
+                min-width: auto;
+            }
+            
+            .accessibility-controls {
+                position: relative;
+                top: auto;
+                right: auto;
+                flex-direction: row;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+        }
+
+        .large-text {
+            font-size: 1.2em;
+        }
+
+        .high-contrast {
+            filter: contrast(150%);
+        }
+
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="accessibility-controls">
+        <button class="btn btn-secondary" onclick="increaseFontSize()" aria-label="เพิ่มขนาดตัวอักษร">A+</button>
+        <button class="btn btn-secondary" onclick="toggleContrast()" aria-label="ปรับคอนทราสต์">🔆</button>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>RVC101 Esports Challenge 2025</h1>
+            <p>Photo Booth — ถ่ายภาพสุดเท่ห์สำหรับนักอีสปอร์ต</p>
+        </header>
+
+        <div class="privacy-notice">
+            <h3>🔒 ประกาศความเป็นส่วนตัว</h3>
+            <p>ภาพจะถูกเก็บไว้ชั่วคราวในเครื่องเท่านั้น และจะไม่ถูกส่งออกนอกเครื่องโดยอัตโนมัติ ข้อมูลของคุณปลอดภัย</p>
+            <div class="checkbox-group">
+                <input type="checkbox" id="privacyConsent" required>
+                <label for="privacyConsent">ฉันยอมรับเงื่อนไขการใช้งาน</label>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="camera-section">
+                <h2>📹 กล้อง</h2>
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted aria-label="วิดีโอจากกล้อง"></video>
+                    <img id="framePreview" class="frame-overlay" src="https://lh3.googleusercontent.com/sitesv/AICyYdZfP7dFoYustlLuWeFbb3zKBYYAr5XVTxISZXdTt7xnfzcA42UtQZq-YN5ADvIScFHv2cWeF2umG6m080p9YujOvoZvs7QI-AUj7HkDOCA_rUkdX3nHb6d-iVSk5hKp5iRZq9RRq0BVaIGn2S2aG4Zp9Scs4dllVd3oc_U9VoodM9MdjnIgPGpNBt1JuABwLnEi8xp-qidoClMjt9q_APC_UOCuXInvzysj=w1280" alt="Frame overlay">
+                    <div id="countdown" class="countdown-overlay" aria-live="polite"></div>
+                    <div id="cameraError" class="camera-error">
+                        <h3>📹 เริ่มใช้งานกล้อง</h3>
+                        <p><strong>ขั้นตอนที่ 1:</strong> ✅ ยอมรับเงื่อนไขการใช้งานด้านบน</p>
+                        <p><strong>ขั้นตอนที่ 2:</strong> 🔒 อนุญาตให้เข้าถึงกล้องเมื่อเบราว์เซอร์ถาม</p>
+                        <div style="margin: 20px 0; padding: 15px; background: rgba(255, 193, 7, 0.1); border-radius: 8px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            <h4 style="color: #ffc107; margin-bottom: 10px;">💡 วิธีอนุญาตกล้อง:</h4>
+                            <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Chrome/Edge:</strong> คลิกไอคอนกล้อง 📹 ในแถบที่อยู่ → เลือก "อนุญาต"</li>
+                                <li><strong>Safari:</strong> Safari → การตั้งค่า → เว็บไซต์ → กล้อง → อนุญาต</li>
+                                <li><strong>มือถือ:</strong> อนุญาตกล้องในการตั้งค่าเบราว์เซอร์</li>
+                                <li><strong>สำคัญ:</strong> ต้องใช้ HTTPS (ไม่ใช่ HTTP)</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary" onclick="requestCameraAccess()" style="margin-top: 10px;">🔄 เริ่มใช้งานกล้อง</button>
+                    </div>
+                </div>
+                <button id="captureBtn" class="btn btn-primary capture-btn" onclick="capturePhoto()" disabled>
+                    📸 ถ่ายภาพ
+                </button>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="toggleKioskMode()">🤖 โหมดบูธ</button>
+                    <button class="btn btn-danger" onclick="clearData()">🗑️ ลบข้อมูล</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultSection" class="result-section">
+            <h2>📷 ผลลัพธ์</h2>
+            <div class="result-content">
+                <div class="result-image">
+                    <img id="resultImage" alt="ภาพที่ถ่าย">
+                </div>
+                <div class="result-actions">
+                    <div class="qr-container">
+                        <canvas id="qrcode"></canvas>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">📱 สแกนเพื่อดาวน์โหลดภาพ</p>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="downloadImage()">💾 ดาวน์โหลด</button>
+                        <button class="btn btn-secondary" onclick="shareImage()">📤 แชร์</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="takeAnother()" style="width: 100%; margin-top: 10px;">
+                        📸 ถ่ายใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="kioskMode" class="kiosk-mode hidden">
+        <div>🤖 โหมดบูธ: เปิด</div>
+        <div id="kioskTimer">ถ่ายอัตโนมัติใน: <span id="kioskCountdown">10</span>s</div>
+    </div>
+
+    <canvas id="canvas" width="1280" height="720"></canvas>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">แจ้งเตือน</h3>
+            <p id="modalMessage"></p>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="closeModal()">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // QR Code Generator (embedded)
+        !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e=e||self).QRCode=t()}(this,function(){"use strict";function e(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function t(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function r(e,r,n){return r&&t(e.prototype,r),n&&t(e,n),e}var n=function(){function t(r){e(this,t),this.mode=n.MODE.NORMAL}return r(t,null,[{key:"MODE",get:function(){return{NORMAL:0,BATCH:1}}}]),t}(),o=function(){function t(r){e(this,t),this.data=r,this.index=0,this.count=r.length}return r(t,[{key:"get",value:function(e){return this.data[e]}},{key:"hasNext",value:function(){return this.index<this.count}},{key:"next",value:function(){return this.data[this.index++]}},{key:"reset",value:function(){this.index=0}}]),t}(),a=function(){function t(){e(this,t),this.buffer=[],this.length=0}return r(t,[{key:"get",value:function(e){return 1==(this.buffer[Math.floor(e/8)]>>>7-e%8&1)}},{key:"put",value:function(e,t){for(var r=0;r<t;r++)this.putBit(1==(e>>>t-r-1&1))}},{key:"getLengthInBits",value:function(){return this.length}},{key:"putBit",value:function(e){var t=Math.floor(this.length/8);this.buffer.length<=t&&this.buffer.push(0),e&&(this.buffer[t]|=128>>>this.length%8),this.length++}}]),t}(),u=function(){function t(r){e(this,t),this.mode=u.MODE.NUMBER,this.data=r}return r(t,[{key:"getLength",value:function(){return this.data.length}},{key:"write",value:function(e){for(var t=this.data,r=0;r+2<t.length;)e.put(this.getCode(t.substring(r,r+3)),10),r+=3;r<t.length&&(t.length-r==1?e.put(this.getCode(t.substring(r,r+1)),4):t.length-r==2&&e.put(this.getCode(t.substring(r,r+2)),7))}},{key:"getCode",value:function(e){return parseInt(e,10)}}],[{key:"MODE",get:function(){return{NUMBER:1,ALPHA_NUM:2,BYTE:4,KANJI:8}}}]),t}(),i=function(){function t(r){e(this,t),this.mode=u.MODE.ALPHA_NUM,this.data=r}return r(t,[{key:"getLength",value:function(){return this.data.length}},{key:"write",value:function(e){for(var t=this.data,r=0;r+1<t.length;)e.put(45*this.getCode(t.charAt(r))+this.getCode(t.charAt(r+1)),11),r+=2;r<t.length&&e.put(this.getCode(t.charAt(r)),6)}},{key:"getCode",value:function(e){if("0"<=e&&e<="9")return e.charCodeAt(0)-"0".charCodeAt(0);if("A"<=e&&e<="Z")return e.charCodeAt(0)-"A".charCodeAt(0)+10;switch(e){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw new Error("Illegal character: "+e)}}}]),t}(),f=function(){function t(r){e(this,t),this.mode=u.MODE.BYTE,this.data=new o(r)}return r(t,[{key:"getLength",value:function(){return this.data.count}},{key:"write",value:function(e){for(;this.data.hasNext();)e.put(this.data.next(),8)}}]),t}(),s=function(){function t(r){e(this,t),this.mode=u.MODE.KANJI,this.data=r}return r(t,[{key:"getLength",value:function(){return this.data.length}},{key:"write",value:function(e){for(var t=this.data,r=0;r<t.length;r++){var n=t.charCodeAt(r);if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw new Error("Illegal char at "+(r+1)+"/"+n);n-=49472}e.put(192*(n>>>8&255)+(255&n),13)}}}]),t}(),c=function(){function t(r,n){e(this,t),this.totalCount=r,this.dataCount=n}return r(t,null,[{key:"getRSBlocks",value:function(e,r){var n=t.getRsBlockTable(e,r);if(null==n)throw new Error("bad rs block @ typeNumber:"+e+"/errorCorrectLevel:"+r);for(var o=n.length/3,a=new Array,u=0;u<o;u++)for(var i=n[3*u+0],f=n[3*u+1],s=n[3*u+2],c=0;c<i;c++)a.push(new t(f,s));return a}},{key:"getRsBlockTable",value:function(e,t){switch(t){case h.L:return c.RS_BLOCK_TABLE[4*(e-1)+0];case h.M:return c.RS_BLOCK_TABLE[4*(e-1)+1];case h.Q:return c.RS_BLOCK_TABLE[4*(e-1)+2];case h.H:return c.RS_BLOCK_TABLE[4*(e-1)+3];default:return null}}}]),t}();c.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]];var l=function(){function t(r,n){e(this,t),this.num=new Array(r.length+n.length),this.copy(this.num,0,r,0,r.length),this.copy(this.num,r.length,n,0,n.length)}return r(t,[{key:"copy",value:function(e,t,r,n,o){for(var a=t,u=n;u<n+o;u++)e[a]=r[u],a++}},{key:"get",value:function(e){return this.num[e]}},{key:"getLength",value:function(){return this.num.length}},{key:"multiply",value:function(e){for(var r=new Array(this.getLength()+e.getLength()-1),n=0;n<r.length;n++)r[n]=0;for(var o=0;o<this.getLength();o++)for(var a=0;a<e.getLength();a++)r[o+a]^=d.gexp(d.glog(this.get(o))+d.glog(e.get(a)));return new t(r,0)}},{key:"mod",value:function(e){if(this.getLength()-e.getLength()<0)return this;for(var r=d.glog(this.get(0))-d.glog(e.get(0)),n=new Array(this.getLength()),o=0;o<this.getLength();o++)n[o]=this.get(o);for(var a=0;a<e.getLength();a++)n[a]^=d.gexp(d.glog(e.get(a))+r);return new t(n,0).mod(e)}}]),t}(),h=function(){function t(r,n){e(this,t),this.errorCorrectLevel=n,this.parsedData=[],this.addData(r),this.typeNumber=0,this.errorCorrectLevel=n,this.typeNumber=this.getTypeNumber(r),this.modules=null,this.moduleCount=0,this.dataCache=null,this.rsBlocks=null,this.totalDataCount=-1,this.data=r,this.utf8ByteMode=!1,this.make()}return r(t,[{key:"getTypeNumber",value:function(e){for(var t=1;t<41;t++)if(this.getLengthInBits(this.parsedData[0].mode,t)<=8*this.getDataCapacity(t,this.errorCorrectLevel)-8*this.getTotalCodewordsCount(t,this.errorCorrectLevel))return t;throw new Error("Too long data. the InputStream you provided is too long.")}},{key:"addData",value:function(e){if(this.utf8ByteMode)this.parsedData.push(new f(function(e){for(var t=[],r=0;r<e.length;r++){var n=e.charCodeAt(r);n<128?t.push(n):n<2048?(t.push(192|n>>6),t.push(128|63&n)):n<55296||n>=57344?t.push(224|n>>12,128|n>>6&63,128|63&n):(r++,n=65536+((1023&n)<<10|1023&e.charCodeAt(r)),t.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return t}(e)));else{var r=function(e){if(/^[0-9]*$/.test(e))return new u(e);if(/^[A-Z0-9 $%*+-./:]*$/.test(e))return new i(e);return new f(e)}(e);this.parsedData.push(r)}}},{key:"isDark",value:function(e,t){if(e<0||this.moduleCount<=e||t<0||this.moduleCount<=t)throw new Error(e+","+t);return this.modules[e][t]}},{key:"getModuleCount",value:function(){return this.moduleCount}},{key:"make",value:function(){this.getRightType(),this.dataCache=this.createData(),this.createQrcode()}},{key:"createQrcode",value:function(){for(var e=0,t=0,r=null,n=0;n<this.moduleCount;n++){for(var o=0;o<this.moduleCount;o++){var a=!1,u=this.rsBlocks[Math.floor(o/this.moduleCount*this.rsBlocks.length)],i=Math.floor(e/u.totalCount);switch(Math.floor(n/this.moduleCount*this.rsBlocks.length)){case 0:a=0==(n+o)%2;break;case 1:a=0==n%2;break;case 2:a=0==o%3;break;case 3:a=0==(n+o)%3;break;case 4:a=0==(Math.floor(n/2)+Math.floor(o/3))%2;break;case 5:a=0==n*o%2+n*o%3;break;case 6:a=0==(n*o%2+n*o%3)%2;break;case 7:a=0==(n*o%3+(n+o)%2)%2}this.modules[n][o]=a}e++}this.mapData(this.dataCache,this.errorCorrectLevel)}},{key:"mapData",value:function(e,t){for(var r=-1,n=this.moduleCount-1,o=7,a=0,u=this.moduleCount-1;u>0;u-=2)for(6==u&&u--;;){for(var i=0;i<2;i++)if(null==this.modules[n][u-i]){var f=!1;a<e.length&&(f=1==(e[a]>>>o&1)),this.isFunction(n,u-i)&&(f=!f),this.modules[n][u-i]=f,-1==--o&&(a++,o=7)}if((n+=r)<0||this.moduleCount<=n){n-=r,r=-r;break}}}},{key:"isFunction",value:function(e,t){if(e<0||this.moduleCount<=e||t<0||this.moduleCount<=t)throw new Error(e+","+t);return this.functionPattern[e][t]}},{key:"createData",value:function(){var e=new a,t=this.parsedData;for(var r in t){var n=t[r];e.put(n.mode,4),e.put(n.getLength(),this.getLengthInBits(n.mode,this.typeNumber)),n.write(e)}var o=8*this.getDataCapacity(this.typeNumber,this.errorCorrectLevel);for(e.getLengthInBits()+4<=o&&e.put(0,4);e.getLengthInBits()%8!=0;)e.putBit(!1);for(;!(e.getLengthInBits()>=o||(e.put(236,8),e.getLengthInBits()>=o));)e.put(17,8);return this.createBytes(e)}},{key:"createBytes",value:function(e){for(var t=0,r=0,n=0,o=c.getRSBlocks(this.typeNumber,this.errorCorrectLevel),a=new Array,u=0;u<o.length;u++){var i=o[u];t+=i.dataCount,r+=i.totalCount}for(var f=new Array(t),s=0;s<f.length;s++)f[s]=255&e.buffer[s];for(var h=0,g=0;g<o.length;g++){var v=o[g],w=new Array(v.dataCount);for(var y=0;y<w.length;y++)w[y]=f[y+h];h+=v.dataCount;var m=this.getErrorCorrectPolynomial(v.totalCount-v.dataCount),k=new l(w,m.getLength()-1).mod(m);a[g]=new Array(v.totalCount);for(var C=0;C<v.dataCount;C++)a[g][C]=w[C];for(var A=v.dataCount,B=0;B<k.getLength();B++)a[g][A+B]=k.get(B)}for(var E=new Array(r),L=0,M=0;M<o.length;M++)for(var T=0;T<o[M].dataCount;T++)E[L++]=a[M][T];for(var D=0;D<o.length;D++)for(var N=0;N<o[D].totalCount-o[D].dataCount;N++)E[L++]=a[D][o[D].dataCount+N];return E}},{key:"getErrorCorrectPolynomial",value:function(e){for(var t=new l([1],0),r=0;r<e;r++)t=t.multiply(new l([1,d.gexp(r)],0));return t}},{key:"getLengthInBits",value:function(e,t){if(1<=t&&t<10)switch(e){case u.MODE.NUMBER:return 10;case u.MODE.ALPHA_NUM:return 9;case u.MODE.BYTE:return 8;case u.MODE.KANJI:return 8;default:throw new Error("mode:"+e)}else if(t<27)switch(e){case u.MODE.NUMBER:return 12;case u.MODE.ALPHA_NUM:return 11;case u.MODE.BYTE:return 16;case u.MODE.KANJI:return 10;default:throw new Error("mode:"+e)}else{if(!(t<41))throw new Error("type:"+t);switch(e){case u.MODE.NUMBER:return 14;case u.MODE.ALPHA_NUM:return 13;case u.MODE.BYTE:return 16;case u.MODE.KANJI:return 12;default:throw new Error("mode:"+e)}}}},{key:"getRightType",value:function(){for(var e=1;e<41;e++){var t=c.getRSBlocks(e,this.errorCorrectLevel),r=new a;for(var n in this.parsedData){var o=this.parsedData[n];r.put(o.mode,4),r.put(o.getLength(),this.getLengthInBits(o.mode,e)),o.write(r)}var u=8*this.getDataCapacity(e,this.errorCorrectLevel);if(r.getLengthInBits()<=u)break}this.typeNumber=e,this.rsBlocks=t,this.totalDataCount=this.getTotalCodewordsCount(e,this.errorCorrectLevel),this.createModules()}},{key:"getTotalCodewordsCount",value:function(e,t){for(var r=c.getRSBlocks(e,t),n=0,o=0;o<r.length;o++)n+=r[o].totalCount;return n}},{key:"getDataCapacity",value:function(e,t){for(var r=c.getRSBlocks(e,t),n=0,o=0;o<r.length;o++)n+=r[o].dataCount;return n}},{key:"createModules",value:function(){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++){this.modules[e]=new Array(this.moduleCount);for(var t=0;t<this.moduleCount;t++)this.modules[e][t]=null}this.functionPattern=new Array(this.moduleCount);for(var r=0;r<this.moduleCount;r++){this.functionPattern[r]=new Array(this.moduleCount);for(var n=0;n<this.moduleCount;n++)this.functionPattern[r][n]=!1}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(!0,this.errorCorrectLevel),this.typeNumber>=7&&this.setupTypeNumber(!0)}},{key:"setupPositionProbePattern",value:function(e,t){for(var r=-1;r<=7;r++)if(!(e+r<=-1||this.moduleCount<=e+r))for(var n=-1;n<=7;n++)t+n<=-1||this.moduleCount<=t+n||(this.functionPattern[e+r][t+n]=0<=r&&r<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==r||6==r)||2<=r&&r<=4&&2<=n&&n<=4,this.modules[e+r][t+n]=0<=r&&r<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==r||6==r)||2<=r&&r<=4&&2<=n&&n<=4)}},{key:"setupPositionAdjustPattern",value:function(){for(var e=g.getPatternPosition(this.typeNumber),t=0;t<e.length;t++)for(var r=0;r<e.length;r++){var n=e[t],o=e[r];if(null==this.modules[n][o])for(var a=-2;a<=2;a++)for(var u=-2;u<=2;u++)this.functionPattern[n+a][o+u]=!0,this.modules[n+a][o+u]=-2==a||2==a||-2==u||2==u||0==a&&0==u}}},{key:"setupTimingPattern",value:function(){for(var e=8;e<this.moduleCount-8;e++)null==this.modules[e][6]&&(this.functionPattern[e][6]=!0,this.modules[e][6]=0==e%2);for(var t=8;t<this.moduleCount-8;t++)null==this.modules[6][t]&&(this.functionPattern[6][t]=!0,this.modules[6][t]=0==t%2)}},{key:"setupTypeInfo",value:function(e,t){for(var r=v.getBCHTypeInfo(t<<3|e),n=0;n<15;n++){var o=!e&&1==(r>>n&1);n<6?(this.functionPattern[n][8]=!0,this.modules[n][8]=o):n<8?(this.functionPattern[n+1][8]=!0,this.modules[n+1][8]=o):(this.functionPattern[this.moduleCount-15+n][8]=!0,this.modules[this.moduleCount-15+n][8]=o)}for(var a=0;a<15;a++){var u=!e&&1==(r>>a&1);a<8?(this.functionPattern[8][this.moduleCount-a-1]=!0,this.modules[8][this.moduleCount-a-1]=u):a<9?(this.functionPattern[8][15-a-1+1]=!0,this.modules[8][15-a-1+1]=u):(this.functionPattern[8][15-a-1]=!0,this.modules[8][15-a-1]=u)}this.functionPattern[this.moduleCount-8][8]=!0,this.modules[this.moduleCount-8][8]=!e}},{key:"setupTypeNumber",value:function(e){for(var t=v.getBCHTypeNumber(this.typeNumber),r=0;r<18;r++){var n=!e&&1==(t>>r&1);this.functionPattern[Math.floor(r/3)][r%3+this.moduleCount-8-3]=!0,this.modules[Math.floor(r/3)][r%3+this.moduleCount-8-3]=n}for(var o=0;o<18;o++){var a=!e&&1==(t>>o&1);this.functionPattern[o%3+this.moduleCount-8-3][Math.floor(o/3)]=!0,this.modules[o%3+this.moduleCount-8-3][Math.floor(o/3)]=a}}}],[{key:"L",get:function(){return 1}},{key:"M",get:function(){return 0}},{key:"Q",get:function(){return 3}},{key:"H",get:function(){return 2}}]),t}(),d=function(){function t(){e(this,t)}return r(t,null,[{key:"glog",value:function(e){if(e<1)throw new Error("glog("+e+")");return t.LOG_TABLE[e]}},{key:"gexp",value:function(e){for(;e<0;)e+=255;for(;e>=256;)e-=255;return t.EXP_TABLE[e]}}]),t}();d.EXP_TABLE=new Array(256),d.LOG_TABLE=new Array(256);for(var g=0;g<8;g++)d.EXP_TABLE[g]=1<<g;for(var v=8;v<256;v++)d.EXP_TABLE[v]=d.EXP_TABLE[v-4]^d.EXP_TABLE[v-5]^d.EXP_TABLE[v-6]^d.EXP_TABLE[v-8];for(var w=0;w<255;w++)d.LOG_TABLE[d.EXP_TABLE[w]]=w;var y=function(){function t(){e(this,t)}return r(t,null,[{key:"getBCHTypeInfo",value:function(e){for(var r=e<<10;t.getBCHDigit(r)-t.getBCHDigit(t.G15)>=0;)r^=t.G15<<t.getBCHDigit(r)-t.getBCHDigit(t.G15);return(e<<10|r)^t.G15_MASK}},{key:"getBCHTypeNumber",value:function(e){for(var r=e<<12;t.getBCHDigit(r)-t.getBCHDigit(t.G18)>=0;)r^=t.G18<<t.getBCHDigit(r)-t.getBCHDigit(t.G18);return e<<12|r}},{key:"getBCHDigit",value:function(e){for(var t=0;0!=e;)t++,e>>>=1;return t}},{key:"getPatternPosition",value:function(e){return t.PATTERN_POSITION_TABLE[e-1]}},{key:"getMask",value:function(e,t,r){switch(e){case 0:return 0==(t+r)%2;case 1:return 0==t%2;case 2:return 0==r%3;case 3:return 0==(t+r)%3;case 4:return 0==(Math.floor(t/2)+Math.floor(r/3))%2;case 5:return 0==t*r%2+t*r%3;case 6:return 0==(t*r%2+t*r%3)%2;case 7:return 0==(t*r%3+(t+r)%2)%2;default:throw new Error("bad maskPattern:"+e)}}}]),t}();y.G15=1335,y.G18=7973,y.G15_MASK=21522,y.PATTERN_POSITION_TABLE=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]];var m=function(){function t(r,n){e(this,t),this._canvas=r,this._context=this._canvas.getContext("2d"),this._qr=new h(n,h.H)}return r(t,[{key:"draw",value:function(){var e=this._qr,t=this._context;t.fillStyle="black",t.fillRect(0,0,this._canvas.width,this._canvas.height),t.fillStyle="white";var r=this._canvas.width/e.getModuleCount(),n=this._canvas.height/e.getModuleCount();for(var o=0;o<e.getModuleCount();o++)for(var a=0;a<e.getModuleCount();a++)e.isDark(o,a)&&t.fillRect(a*r,o*n,r,n)}}]),t}();return function(e,t){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},n=r.width,o=void 0===n?256:n,a=r.height,u=void 0===a?256:a;return new m(function(e,t,r){var n=document.createElement("canvas");return n.width=t,n.height=r,n}(0,o,u),t).draw(),e}});
+
+        // Global variables
+        let video, canvas, ctx, currentStream;
+        let isKioskMode = false, kioskTimer, kioskCountdown = 10;
+        let lastCapturedImage = null;
+        let fontSizeMultiplier = 1;
+        let highContrast = false;
+
+        // Frame image URL
+        const frameImageUrl = 'https://lh3.googleusercontent.com/sitesv/AICyYdZfP7dFoYustlLuWeFbb3zKBYYAr5XVTxISZXdTt7xnfzcA42UtQZq-YN5ADvIScFHv2cWeF2umG6m080p9YujOvoZvs7QI-AUj7HkDOCA_rUkdX3nHb6d-iVSk5hKp5iRZq9RRq0BVaIGn2S2aG4Zp9Scs4dllVd3oc_U9VoodM9MdjnIgPGpNBt1JuABwLnEi8xp-qidoClMjt9q_APC_UOCuXInvzysj=w1280';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            loadSavedData();
+            setupEventListeners();
+            checkPrivacyConsent();
+        });
+
+        function checkPrivacyConsent() {
+            const consent = localStorage.getItem('privacyConsent');
+            if (consent === 'true') {
+                document.getElementById('privacyConsent').checked = true;
+                initCamera();
+            } else {
+                // Show camera error initially to guide user
+                showCameraError();
+            }
+        }
+
+        function setupEventListeners() {
+            // Privacy consent
+            document.getElementById('privacyConsent').addEventListener('change', function() {
+                if (this.checked) {
+                    localStorage.setItem('privacyConsent', 'true');
+                    // Don't auto-start camera, let user click the button
+                    document.getElementById('cameraError').style.display = 'block';
+                } else {
+                    localStorage.removeItem('privacyConsent');
+                    stopCamera();
+                    showCameraError();
+                }
+            });
+
+            // No form inputs to handle
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.id === 'captureBtn') {
+                    capturePhoto();
+                }
+            });
+        }
+
+        async function initCamera() {
+            if (!document.getElementById('privacyConsent').checked) {
+                showCameraError();
+                return;
+            }
+
+            try {
+                // Check if getUserMedia is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera not supported');
+                }
+
+                const constraints = {
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }
+                };
+
+                // Stop any existing stream first
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+                
+                // Wait for video to be ready
+                video.onloadedmetadata = function() {
+                    video.play().then(() => {
+                        document.getElementById('captureBtn').disabled = false;
+                        document.getElementById('cameraError').style.display = 'none';
+                        console.log('Camera initialized successfully');
+                    }).catch(err => {
+                        console.error('Video play error:', err);
+                        showCameraError();
+                    });
+                };
+
+                video.onerror = function(err) {
+                    console.error('Video error:', err);
+                    showCameraError();
+                };
+
+            } catch (error) {
+                console.error('Camera error:', error);
+                showCameraError();
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            video.srcObject = null;
+            document.getElementById('captureBtn').disabled = true;
+        }
+
+        function showCameraError() {
+            document.getElementById('cameraError').style.display = 'block';
+            document.getElementById('captureBtn').disabled = true;
+        }
+
+        function requestCameraAccess() {
+            if (!document.getElementById('privacyConsent').checked) {
+                showModal('แจ้งเตือน', 'กรุณายอมรับเงื่อนไขการใช้งานก่อน');
+                return;
+            }
+            initCamera();
+        }
+
+        function capturePhoto() {
+            if (!video.videoWidth || !video.videoHeight) {
+                showModal('ข้อผิดพลาด', 'กรุณารอให้กล้องพร้อมใช้งาน');
+                return;
+            }
+
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            let count = 3;
+            
+            countdownEl.style.display = 'block';
+            countdownEl.textContent = count;
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                } else {
+                    countdownEl.textContent = '📸';
+                    setTimeout(() => {
+                        countdownEl.style.display = 'none';
+                        takePhoto();
+                    }, 500);
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        function takePhoto() {
+            // Set canvas size
+            canvas.width = 1280;
+            canvas.height = 720;
+            
+            // Draw video frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Apply filter
+            applyFilter();
+            
+            // Add frame and text overlay (this now handles async image loading)
+            addFrameAndText();
+        }
+
+        function applyFilter() {
+            // No filters applied - using original image
+        }
+
+        function addFrameAndText() {
+            // Load and draw the frame image
+            const frameImg = new Image();
+            frameImg.crossOrigin = 'anonymous';
+            frameImg.onload = function() {
+                // Draw the frame overlay on top of the photo
+                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+                
+                // Add text overlay after frame is loaded
+                addTextOverlay();
+                
+                // Finalize the image
+                finalizeImage();
+            };
+            
+            frameImg.onerror = function() {
+                console.error('Failed to load frame image, using fallback');
+                // Fallback to border effect if image fails to load
+                addFallbackFrame();
+                addTextOverlay();
+                finalizeImage();
+            };
+            
+            frameImg.src = frameImageUrl;
+        }
+        
+        function addFallbackFrame() {
+            // Add frame border effect as fallback
+            ctx.strokeStyle = '#7b3fe4';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+            
+            // Add inner glow
+            ctx.strokeStyle = '#00ffe4';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+        }
+        
+        function addTextOverlay() {
+            // Add text overlay
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 48px Kanit';
+            ctx.textAlign = 'center';
+            
+            // Event title
+            const title = 'RVC101 Esports Challenge 2025';
+            ctx.strokeText(title, canvas.width / 2, 80);
+            ctx.fillText(title, canvas.width / 2, 80);
+        }
+        
+        function finalizeImage() {
+            // Convert to image
+            const imageDataUrl = canvas.toDataURL('image/png');
+            lastCapturedImage = imageDataUrl;
+            
+            // Save to localStorage
+            localStorage.setItem('lastPhoto', imageDataUrl);
+            
+            // Show result
+            showResult(imageDataUrl);
+            
+            // Add confetti effect
+            createConfetti();
+        }
+
+        function showResult(imageDataUrl) {
+            document.getElementById('resultImage').src = imageDataUrl;
+            document.getElementById('resultSection').style.display = 'block';
+            
+            // Generate QR code
+            generateQRCode(imageDataUrl);
+            
+            // Scroll to result
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateQRCode(imageDataUrl) {
+            const qrCanvas = document.getElementById('qrcode');
+            qrCanvas.width = 220;
+            qrCanvas.height = 220;
+            
+            try {
+                // Create QR code with the image data URL
+                QRCode(qrCanvas, imageDataUrl, {
+                    width: 220,
+                    height: 220
+                });
+            } catch (error) {
+                console.error('QR Code generation error:', error);
+                // Fallback: create a simple QR with a message
+                const qrCtx = qrCanvas.getContext('2d');
+                qrCtx.fillStyle = 'white';
+                qrCtx.fillRect(0, 0, 220, 220);
+                qrCtx.fillStyle = 'black';
+                qrCtx.font = '16px Kanit';
+                qrCtx.textAlign = 'center';
+                qrCtx.fillText('QR Code', 110, 110);
+                qrCtx.fillText('Generation Error', 110, 130);
+            }
+        }
+
+        function downloadImage() {
+            if (!lastCapturedImage) {
+                showModal('ข้อผิดพลาด', 'ไม่มีภาพให้ดาวน์โหลด');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `RVC101_${Date.now()}.png`;
+            link.href = lastCapturedImage;
+            link.click();
+        }
+
+        function shareImage() {
+            if (!lastCapturedImage) {
+                showModal('ข้อผิดพลาด', 'ไม่มีภาพให้แชร์');
+                return;
+            }
+            
+            if (navigator.share && navigator.canShare) {
+                // Convert data URL to blob for sharing
+                fetch(lastCapturedImage)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], 'RVC101_photo.png', { type: 'image/png' });
+                        return navigator.share({
+                            title: 'RVC101 Esports Challenge 2025',
+                            text: 'ดูภาพจาก RVC101 Esports Challenge 2025!',
+                            files: [file]
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Share error:', err);
+                        fallbackShare();
+                    });
+            } else {
+                fallbackShare();
+            }
+        }
+
+        function fallbackShare() {
+            const shareText = encodeURIComponent('ดูภาพจาก RVC101 Esports Challenge 2025!');
+            const shareUrl = encodeURIComponent(window.location.href);
+            
+            const shareOptions = [
+                { name: 'Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}` },
+                { name: 'Twitter', url: `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}` },
+                { name: 'LINE', url: `https://social-plugins.line.me/lineit/share?url=${shareUrl}` }
+            ];
+            
+            let modalContent = '<h3>แชร์ภาพ</h3><p>เลือกแพลตฟอร์มที่ต้องการแชร์:</p>';
+            shareOptions.forEach(option => {
+                modalContent += `<button class="btn btn-secondary" onclick="window.open('${option.url}', '_blank', 'noopener,noreferrer')" style="margin: 5px;">${option.name}</button>`;
+            });
+            modalContent += '<p style="margin-top: 15px; font-size: 0.9rem;">หรือดาวน์โหลดภาพแล้วแชร์ด้วยตนเอง</p>';
+            
+            document.getElementById('modalTitle').textContent = 'แชร์ภาพ';
+            document.getElementById('modalMessage').innerHTML = modalContent;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function takeAnother() {
+            document.getElementById('resultSection').style.display = 'none';
+            document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleKioskMode() {
+            isKioskMode = !isKioskMode;
+            const kioskEl = document.getElementById('kioskMode');
+            
+            if (isKioskMode) {
+                kioskEl.classList.remove('hidden');
+                startKioskTimer();
+            } else {
+                kioskEl.classList.add('hidden');
+                clearInterval(kioskTimer);
+            }
+        }
+
+        function startKioskTimer() {
+            kioskCountdown = 10;
+            document.getElementById('kioskCountdown').textContent = kioskCountdown;
+            
+            kioskTimer = setInterval(() => {
+                kioskCountdown--;
+                document.getElementById('kioskCountdown').textContent = kioskCountdown;
+                
+                if (kioskCountdown <= 0) {
+                    if (document.getElementById('privacyConsent').checked) {
+                        capturePhoto();
+                    }
+                    kioskCountdown = 10;
+                }
+            }, 1000);
+        }
+
+        function createConfetti() {
+            const colors = ['#7b3fe4', '#00ffe4', '#ff6b7a', '#ffc107'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 50);
+            }
+        }
+
+        function saveData() {
+            // No form data to save
+        }
+
+        function loadSavedData() {
+            // Load last photo if exists
+            const lastPhoto = localStorage.getItem('lastPhoto');
+            if (lastPhoto) {
+                lastCapturedImage = lastPhoto;
+            }
+        }
+
+        function clearData() {
+            if (confirm('ต้องการลบข้อมูลทั้งหมดใช่หรือไม่?')) {
+                localStorage.removeItem('lastPhoto');
+                localStorage.removeItem('privacyConsent');
+                
+                // Reset privacy consent
+                document.getElementById('privacyConsent').checked = false;
+                
+                // Hide result section
+                document.getElementById('resultSection').style.display = 'none';
+                
+                // Stop camera
+                stopCamera();
+                
+                lastCapturedImage = null;
+                
+                showModal('สำเร็จ', 'ลบข้อมูลทั้งหมดแล้ว');
+            }
+        }
+
+        function increaseFontSize() {
+            fontSizeMultiplier = fontSizeMultiplier === 1 ? 1.2 : 1;
+            document.body.classList.toggle('large-text', fontSizeMultiplier > 1);
+        }
+
+        function toggleContrast() {
+            highContrast = !highContrast;
+            document.body.classList.toggle('high-contrast', highContrast);
+        }
+
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9931f50f60b4d02f',t:'MTc2MTIzMDA4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
