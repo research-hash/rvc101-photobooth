@@ -145,7 +145,7 @@
         /* Frame 1: RVC101 Main */
         .frame-rvc101-main {
             background: linear-gradient(45deg, transparent 20%, rgba(123, 63, 228, 0.1) 50%, transparent 80%);
-            border: 3px solid var(--primary-purple);
+            border: 8px solid var(--primary-purple);
             box-shadow: 
                 inset 0 0 30px rgba(123, 63, 228, 0.3),
                 0 0 50px rgba(123, 63, 228, 0.5);
@@ -162,9 +162,10 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             text-shadow: 0 0 20px rgba(123, 63, 228, 0.8);
+            white-space: nowrap;
         }
 
         @keyframes circuitGlow {
@@ -175,7 +176,7 @@
         /* Frame 2: Esports Champion */
         .frame-esports-champ {
             background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.1) 50%, transparent 70%);
-            border: 3px solid;
+            border: 8px solid;
             border-image: linear-gradient(45deg, var(--gold), var(--copper), var(--gold)) 1;
             animation: championShimmer 1.5s ease-in-out infinite;
         }
@@ -200,7 +201,7 @@
         /* Frame 3: Team Hero */
         .frame-team-hero {
             background: radial-gradient(circle at center, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
-            border: 3px solid var(--neon-blue);
+            border: 8px solid var(--neon-blue);
             box-shadow: 0 0 60px rgba(0, 212, 255, 0.4);
             animation: heroGlow 2.5s ease-in-out infinite alternate;
         }
@@ -224,7 +225,7 @@
 
         /* Frame 4: Glitch Style */
         .frame-glitch {
-            border: 3px solid var(--neon-pink);
+            border: 8px solid var(--neon-pink);
             animation: glitchEffect 0.3s infinite;
         }
 
@@ -264,7 +265,7 @@
 
         /* Frame 5: Cyber Neon */
         .frame-neon {
-            border: 3px solid var(--neon-blue);
+            border: 8px solid var(--neon-blue);
             box-shadow: 
                 0 0 20px var(--neon-blue),
                 inset 0 0 20px rgba(0, 212, 255, 0.1);
@@ -297,7 +298,7 @@
         /* Frame 6: Sponsor */
         .frame-sponsor {
             background: rgba(0, 0, 0, 0.8);
-            border: 2px solid rgba(0, 212, 255, 0.6);
+            border: 8px solid rgba(0, 212, 255, 0.6);
             box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
         }
 
@@ -563,23 +564,42 @@
                         <div class="frame-btn" data-frame="frame-sponsor">Sponsor</div>
                         <div class="frame-btn" data-frame="frame-custom" id="customFrameBtn" style="display: none;">Custom Frame</div>
                     </div>
+                    
+                    <!-- Custom Frame Selector (shown when custom frames are available) -->
+                    <div id="customFrameSelector" style="display: none; margin-top: 15px;">
+                        <label style="color: #00d4ff; font-weight: bold; margin-bottom: 10px; display: block;">เลือกเฟรมที่อัพโหลด</label>
+                        <div id="customFrameList" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 200px; overflow-y: auto;">
+                            <!-- Custom frame thumbnails will be added here -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="customFrame">อัพโหลดเฟรมเอง (PNG/JPG)</label>
-                    <input type="file" id="customFrame" accept="image/*" style="padding: 8px;">
+                    <label for="customFrame">อัพโหลดเฟรมเอง (PNG/JPG) - สามารถเลือกหลายไฟล์</label>
+                    <input type="file" id="customFrame" accept="image/*" multiple style="padding: 8px;">
+                    <div style="margin-top: 8px; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 5px; font-size: 0.85rem; color: #00d4ff;">
+                        <strong>📏 ขนาดเฟรมที่แนะนำ:</strong><br>
+                        • <strong>HD:</strong> 1280 x 720 พิกเซล (16:9)<br>
+                        • <strong>Full HD:</strong> 1920 x 1080 พิกเซล (16:9)<br>
+                        • <strong>Square:</strong> 1080 x 1080 พิกเซล (1:1)<br>
+                        • <strong>Portrait:</strong> 1080 x 1350 พิกเซล (4:5)<br><br>
+                        <strong>💡 เคล็ดลับ:</strong> ใช้ไฟล์ PNG พื้นหลังโปร่งใส หรือ JPG คุณภาพสูง<br>
+                        ขนาดไฟล์ไม่เกิน 5MB เพื่อประสิทธิภาพที่ดี
+                    </div>
                 </div>
 
                 <button class="btn btn-primary" id="startCamera">📷 เปิดกล้อง</button>
                 <button class="btn btn-success" id="capturePhoto" style="display: none;">📸 ถ่ายภาพ</button>
-                <button class="btn btn-warning" id="downloadPhoto" style="display: none;">💾 ดาวน์โหลด PNG</button>
-                <button class="btn btn-info" id="sharePhoto" style="display: none;">📤 แชร์ภาพ</button>
             </div>
         </div>
 
         <div class="preview-section" id="previewSection" style="display: none;">
             <h3>ภาพที่ถ่าย</h3>
             <img id="preview" alt="ภาพที่ถ่าย">
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-warning" id="downloadPhoto" style="display: none; width: auto; padding: 12px 30px;">💾 ดาวน์โหลด PNG</button>
+                <button class="btn btn-info" id="sharePhoto" style="display: none; width: auto; padding: 12px 30px;">📤 แชร์ภาพ</button>
+            </div>
         </div>
     </div>
 
@@ -593,7 +613,8 @@
     <script>
         let stream = null;
         let currentFrame = 'frame-rvc101-main';
-        let customFrameImage = null;
+        let customFrames = []; // Array to store multiple custom frames
+        let selectedCustomFrameIndex = 0;
         
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -612,40 +633,42 @@
         const nicknameInput = document.getElementById('nickname');
         const teamNameInput = document.getElementById('teamName');
         
-        // Custom frame upload
+        // Custom frame upload (multiple files)
         customFrameInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        customFrameImage = img;
-                        customFrameBtn.style.display = 'block';
-                        
-                        // Auto-select custom frame
-                        document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
-                        customFrameBtn.classList.add('active');
-                        
-                        // Hide all frames and show custom
-                        document.querySelectorAll('.frame-overlay').forEach(frame => {
-                            frame.classList.remove('active');
-                        });
-                        currentFrame = 'frame-custom';
-                        document.getElementById(currentFrame).classList.add('active');
-                        
-                        // Update custom frame background
-                        const customFrameElement = document.getElementById('frame-custom');
-                        customFrameElement.style.backgroundImage = `url(${event.target.result})`;
-                        customFrameElement.style.backgroundSize = 'cover';
-                        customFrameElement.style.backgroundPosition = 'center';
-                        customFrameElement.style.backgroundRepeat = 'no-repeat';
-                        
-                        showCustomAlert('อัพโหลดเฟรมสำเร็จ! เฟรมของคุณพร้อมใช้งานแล้ว');
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                let loadedCount = 0;
+                const totalFiles = files.length;
+                
+                files.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // Add to custom frames array
+                            customFrames.push({
+                                image: img,
+                                dataUrl: event.target.result,
+                                name: file.name
+                            });
+                            
+                            loadedCount++;
+                            
+                            // When all files are loaded
+                            if (loadedCount === totalFiles) {
+                                updateCustomFrameUI();
+                                
+                                // Auto-select custom frame and show the first one
+                                selectedCustomFrameIndex = customFrames.length - totalFiles; // Start with first new frame
+                                selectCustomFrame(selectedCustomFrameIndex);
+                                
+                                showCustomAlert(`อัพโหลดเฟรมสำเร็จ! เพิ่มเฟรมใหม่ ${totalFiles} ภาพ`);
+                            }
+                        };
+                        img.src = event.target.result;
                     };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+                    reader.readAsDataURL(file);
+                });
             }
         });
         
@@ -716,9 +739,12 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             // Draw frame overlay
-            if (currentFrame === 'frame-custom' && customFrameImage) {
-                // Draw custom frame
-                ctx.drawImage(customFrameImage, 0, 0, canvas.width, canvas.height);
+            if (currentFrame === 'frame-custom' && customFrames.length > 0) {
+                // Draw selected custom frame
+                const selectedFrame = customFrames[selectedCustomFrameIndex];
+                if (selectedFrame) {
+                    ctx.drawImage(selectedFrame.image, 0, 0, canvas.width, canvas.height);
+                }
             } else {
                 drawFrameOverlay(ctx, canvas.width, canvas.height);
             }
@@ -918,7 +944,7 @@
             
             // Draw frame border
             ctx.strokeStyle = frameData.borderColor;
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 12;
             ctx.strokeRect(10, 10, width - 20, height - 20);
             
             // Draw frame effects
@@ -931,7 +957,7 @@
             // Draw frame title
             if (frameData.title) {
                 ctx.fillStyle = frameData.titleColor;
-                ctx.font = 'bold 36px Arial';
+                ctx.font = 'bold 28px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(frameData.title, width / 2, 60);
             }
@@ -1019,7 +1045,7 @@
                             gradient.addColorStop(0.5, '#b87333');
                             gradient.addColorStop(1, '#ffd700');
                             ctx.strokeStyle = gradient;
-                            ctx.lineWidth = 8;
+                            ctx.lineWidth = 12;
                             ctx.strokeRect(5, 5, w - 10, h - 10);
                         }
                     ]
@@ -1068,7 +1094,7 @@
                             ctx.shadowColor = '#00d4ff';
                             ctx.shadowBlur = 20;
                             ctx.strokeStyle = '#00d4ff';
-                            ctx.lineWidth = 4;
+                            ctx.lineWidth = 8;
                             ctx.strokeRect(15, 15, w - 30, h - 30);
                             ctx.shadowBlur = 0;
                         }
@@ -1084,7 +1110,7 @@
                             ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
                             ctx.fillRect(w - 220, h - 120, 200, 100);
                             ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
-                            ctx.lineWidth = 2;
+                            ctx.lineWidth = 4;
                             ctx.strokeRect(w - 220, h - 120, 200, 100);
                             
                             // Sponsor text
@@ -1098,6 +1124,107 @@
             };
             
             return frames[frameId] || frames['frame-rvc101-main'];
+        }
+        
+        // Function to update custom frame UI
+        function updateCustomFrameUI() {
+            const customFrameSelector = document.getElementById('customFrameSelector');
+            const customFrameList = document.getElementById('customFrameList');
+            const customFrameBtn = document.getElementById('customFrameBtn');
+            
+            if (customFrames.length > 0) {
+                customFrameBtn.style.display = 'block';
+                customFrameSelector.style.display = 'block';
+                
+                // Clear existing thumbnails
+                customFrameList.innerHTML = '';
+                
+                // Add thumbnails for each custom frame
+                customFrames.forEach((frame, index) => {
+                    const thumbnail = document.createElement('div');
+                    thumbnail.style.cssText = `
+                        width: 80px;
+                        height: 60px;
+                        background-image: url(${frame.dataUrl});
+                        background-size: cover;
+                        background-position: center;
+                        border: 2px solid ${index === selectedCustomFrameIndex ? '#00d4ff' : 'rgba(123, 63, 228, 0.3)'};
+                        border-radius: 5px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                    `;
+                    
+                    // Add frame number
+                    const frameNumber = document.createElement('div');
+                    frameNumber.textContent = index + 1;
+                    frameNumber.style.cssText = `
+                        position: absolute;
+                        top: 2px;
+                        right: 2px;
+                        background: rgba(0, 0, 0, 0.7);
+                        color: white;
+                        font-size: 10px;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                        font-weight: bold;
+                    `;
+                    
+                    thumbnail.appendChild(frameNumber);
+                    
+                    // Add click event
+                    thumbnail.addEventListener('click', function() {
+                        selectCustomFrame(index);
+                    });
+                    
+                    // Add hover effect
+                    thumbnail.addEventListener('mouseenter', function() {
+                        if (index !== selectedCustomFrameIndex) {
+                            this.style.borderColor = '#7b3fe4';
+                            this.style.boxShadow = '0 0 10px rgba(123, 63, 228, 0.5)';
+                        }
+                    });
+                    
+                    thumbnail.addEventListener('mouseleave', function() {
+                        if (index !== selectedCustomFrameIndex) {
+                            this.style.borderColor = 'rgba(123, 63, 228, 0.3)';
+                            this.style.boxShadow = 'none';
+                        }
+                    });
+                    
+                    customFrameList.appendChild(thumbnail);
+                });
+            }
+        }
+        
+        // Function to select a custom frame
+        function selectCustomFrame(index) {
+            if (index >= 0 && index < customFrames.length) {
+                selectedCustomFrameIndex = index;
+                
+                // Update UI
+                updateCustomFrameUI();
+                
+                // Auto-select custom frame category
+                document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('customFrameBtn').classList.add('active');
+                
+                // Hide all frames and show custom
+                document.querySelectorAll('.frame-overlay').forEach(frame => {
+                    frame.classList.remove('active');
+                });
+                currentFrame = 'frame-custom';
+                document.getElementById(currentFrame).classList.add('active');
+                
+                // Update custom frame background
+                const customFrameElement = document.getElementById('frame-custom');
+                const selectedFrame = customFrames[selectedCustomFrameIndex];
+                customFrameElement.style.backgroundImage = `url(${selectedFrame.dataUrl})`;
+                customFrameElement.style.backgroundSize = 'cover';
+                customFrameElement.style.backgroundPosition = 'center';
+                customFrameElement.style.backgroundRepeat = 'no-repeat';
+            }
         }
         
         function showCustomAlert(message) {
@@ -1160,5 +1287,5 @@
         // Initialize default frame
         document.getElementById(currentFrame).classList.add('active');
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'993264edb59e37d6',t:'MTc2MTIzNDY3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99327f00c51d26d5',t:'MTc2MTIzNTczOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
