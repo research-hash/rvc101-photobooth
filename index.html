@@ -1203,16 +1203,40 @@
             }
             
             try {
-                const constraints = {
-                    video: {
-                        facingMode: currentCamera,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    }
-                };
+                let constraints;
                 
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                // Try with exact facing mode first
+                try {
+                    constraints = {
+                        video: {
+                            facingMode: { exact: currentCamera },
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (exactError) {
+                    // Fallback to any camera
+                    constraints = {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                }
+                
                 video.srcObject = stream;
+                
+                // Wait for video to be ready
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = () => {
+                        video.play().then(resolve).catch(reject);
+                    };
+                    video.onerror = reject;
+                    setTimeout(() => reject(new Error('Video load timeout')), 5000);
+                });
+                
                 applyEffects();
             } catch (err) {
                 console.error('Error restarting camera:', err);
@@ -1272,17 +1296,55 @@
         // Start camera
         startCameraBtn.addEventListener('click', async function() {
             try {
-                const constraints = {
-                    video: {
-                        facingMode: currentCamera,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    }
-                };
+                // Stop existing stream first
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
                 
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                // Show loading state
+                startCameraBtn.textContent = '⏳ กำลังเปิดกล้อง...';
+                startCameraBtn.disabled = true;
                 
+                // Try different constraint approaches
+                let constraints;
+                
+                // First try with specific facing mode
+                try {
+                    constraints = {
+                        video: {
+                            facingMode: { exact: currentCamera },
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (exactError) {
+                    // Fallback to any camera
+                    console.log('Exact facing mode failed, trying any camera...');
+                    constraints = {
+                        video: {
+                            width: { ideal: 1280, max: 1920 },
+                            height: { ideal: 720, max: 1080 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                }
+                
+                // Set video source and wait for it to load
                 video.srcObject = stream;
+                
+                // Wait for video to be ready
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = () => {
+                        video.play().then(resolve).catch(reject);
+                    };
+                    video.onerror = reject;
+                    
+                    // Timeout after 10 seconds
+                    setTimeout(() => reject(new Error('Video load timeout')), 10000);
+                });
+                
+                // Success - show video and hide placeholder
                 video.style.display = 'block';
                 cameraPlaceholder.style.display = 'none';
                 
@@ -1294,12 +1356,119 @@
                 document.getElementById(currentFrame).classList.add('active');
                 applyEffects();
                 
+                showCustomAlert('เปิดกล้องสำเร็จ! พร้อมถ่ายภาพแล้ว');
+                
             } catch (err) {
-                cameraPlaceholder.innerHTML = `
-                    <p>❌ ไม่สามารถเข้าถึงกล้องได้</p>
-                    <p>กรุณาอนุญาตการเข้าถึงกล้องในเบราว์เซอร์</p>
-                    <p>หรือตรวจสอบว่าเว็บไซต์ทำงานบน HTTPS</p>
-                `;
+                console.error('Camera error:', err);
+                
+                // Reset button state
+                startCameraBtn.textContent = '📷 เปิดกล้อง';
+                startCameraBtn.disabled = false;
+                
+                // Show detailed error message
+                let errorMessage = '';
+                if (err.name === 'NotAllowedError') {
+                    errorMessage = `
+                        <p>❌ ไม่ได้รับอนุญาตให้เข้าถึงกล้อง</p>
+                        <p>กรุณาคลิกที่ไอคอนกล้องในแถบที่อยู่ของเบราว์เซอร์</p>
+                        <p>และเลือก "อนุญาต" เพื่อให้เว็บไซต์เข้าถึงกล้องได้</p>
+                        <button onclick="location.reload()" style="
+                            background: linear-gradient(45deg, #7b3fe4, #00d4ff);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            margin-top: 10px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        ">🔄 รีเฟรชหน้า</button>
+                    `;
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage = `
+                        <p>❌ ไม่พบกล้องในอุปกรณ์</p>
+                        <p>กรุณาตรวจสอบว่าอุปกรณ์มีกล้องและเชื่อมต่อแล้ว</p>
+                    `;
+                } else if (err.name === 'NotReadableError') {
+                    errorMessage = `
+                        <p>❌ กล้องถูกใช้งานโดยแอปพลิเคชันอื่น</p>
+                        <p>กรุณาปิดแอปพลิเคชันอื่นที่ใช้กล้องแล้วลองใหม่</p>
+                        <button onclick="location.reload()" style="
+                            background: linear-gradient(45deg, #7b3fe4, #00d4ff);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            margin-top: 10px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        ">🔄 รีเฟรชหน้า</button>
+                    `;
+                } else if (err.name === 'OverconstrainedError') {
+                    errorMessage = `
+                        <p>❌ กล้องไม่รองรับความละเอียดที่ต้องการ</p>
+                        <p>กำลังลองใช้ความละเอียดที่ต่ำลง...</p>
+                    `;
+                    
+                    // Try with lower resolution
+                    setTimeout(async () => {
+                        try {
+                            const lowResConstraints = {
+                                video: {
+                                    width: { ideal: 640 },
+                                    height: { ideal: 480 }
+                                }
+                            };
+                            stream = await navigator.mediaDevices.getUserMedia(lowResConstraints);
+                            video.srcObject = stream;
+                            
+                            await new Promise((resolve, reject) => {
+                                video.onloadedmetadata = () => {
+                                    video.play().then(resolve).catch(reject);
+                                };
+                                video.onerror = reject;
+                                setTimeout(() => reject(new Error('Video load timeout')), 5000);
+                            });
+                            
+                            video.style.display = 'block';
+                            cameraPlaceholder.style.display = 'none';
+                            startCameraBtn.style.display = 'none';
+                            capturePhotoBtn.style.display = 'block';
+                            timerCaptureBtn.style.display = 'block';
+                            quickCaptureBtn.style.display = 'block';
+                            
+                            document.getElementById(currentFrame).classList.add('active');
+                            applyEffects();
+                            
+                            showCustomAlert('เปิดกล้องสำเร็จด้วยความละเอียดต่ำ!');
+                            
+                        } catch (lowResErr) {
+                            cameraPlaceholder.innerHTML = `
+                                <p>❌ ไม่สามารถเปิดกล้องได้แม้ด้วยความละเอียดต่ำ</p>
+                                <p>กรุณาตรวจสอบการเชื่อมต่อกล้องและลองใหม่</p>
+                            `;
+                        }
+                    }, 2000);
+                    
+                } else {
+                    errorMessage = `
+                        <p>❌ เกิดข้อผิดพลาดในการเปิดกล้อง</p>
+                        <p>กรุณาตรวจสอบว่าเว็บไซต์ทำงานบน HTTPS</p>
+                        <p>และอนุญาตการเข้าถึงกล้องในเบราว์เซอร์</p>
+                        <p style="font-size: 0.8rem; color: #888;">Error: ${err.message}</p>
+                        <button onclick="location.reload()" style="
+                            background: linear-gradient(45deg, #7b3fe4, #00d4ff);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            margin-top: 10px;
+                            cursor: pointer;
+                            font-weight: bold;
+                        ">🔄 รีเฟรชหน้า</button>
+                    `;
+                }
+                
+                cameraPlaceholder.innerHTML = errorMessage;
             }
         });
         
@@ -2302,5 +2471,5 @@
         // Initialize default frame
         document.getElementById(currentFrame).classList.add('active');
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99360b52663b893f',t:'MTc2MTI3Mjk0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99360ff9b548893f',t:'MTc2MTI3MzEzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
