@@ -2067,16 +2067,76 @@
                     titleColor: 'rgba(255, 255, 255, 0.8)',
                     effects: [
                         (ctx, w, h) => {
-                            ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
-                            ctx.fillRect(w - 220, h - 120, 200, 100);
-                            ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
-                            ctx.lineWidth = 4;
-                            ctx.strokeRect(w - 220, h - 120, 200, 100);
+                            // Create sponsor images array
+                            const sponsorImages = [
+                                'https://lh3.googleusercontent.com/sitesv/AICyYda_ELUhUqnkUkR-2cN-9t2MOUJOXAp9r7PqHW66TpN6LJVHmRBCSwntqd-SZm0H-5IDLxNsRVOAmKxQoQJJKk6rXGvRAqkfnrvx-AmaOTu3qMwFZlbf6Zi4v45wu-z8Ml6PWchl1o2H2mIophLlL258h4ThWfjHp_QRMyPpYCiJMKoOmCJGumV7E00=w1280',
+                                'https://lh3.googleusercontent.com/sitesv/AICyYdbxVDwq_5-iPILmJYMP-fl8oeXn_oUgjVqk7kFHXp4fb1lqvxbgz3YN5r4KzepaAW3H0v3jdnJw1qK3hngHiBnlmaHFKbLpsICzdbkpWzq1xXO5v3t6vXrJSZdBZylRYR5ton0Lc1i9G2IrIFvnyXJcXpJ_vXiZhKvZxgpUcNQ-Ny-WvYHoFA1z7aQ0QwdxtTCPXlRAX5HjwBO8fvlGXy1xsI2jBKtCjGRNeMw=w1280',
+                                'https://lh3.googleusercontent.com/sitesv/AICyYdazecGIAptZTjeDdkGwFc5czirMREYzqqxnchQsnKNAAFiRf-kILq_6Z0IiRfQaWKO6m3q9FB239CUfFhZ5YUzwByAxtgRyZbak2L9OITKrG6QRBYKza6Nne6-Fsfx2TR7IUZwp_5jXcFvIUYD9WlnHG6tWBWr4N4lm7NxJ2cobOjaH7gsNan2lLQ1I1J7F7-OKBOnf5-HuERzh95wI8omshfd5N_R0Q2cT0n8=w1280'
+                            ];
                             
-                            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                            ctx.font = '16px Arial';
-                            ctx.textAlign = 'center';
-                            ctx.fillText('SPONSOR LOGO', w - 120, h - 65);
+                            // Load and draw sponsor images
+                            sponsorImages.forEach((imgSrc, index) => {
+                                const img = new Image();
+                                img.crossOrigin = 'anonymous';
+                                img.onload = function() {
+                                    // Position sponsors in different corners
+                                    let x, y, imgW, imgH;
+                                    
+                                    if (index === 0) {
+                                        // Top right corner
+                                        imgW = 180;
+                                        imgH = 90;
+                                        x = w - imgW - 20;
+                                        y = 20;
+                                    } else if (index === 1) {
+                                        // Bottom right corner
+                                        imgW = 180;
+                                        imgH = 90;
+                                        x = w - imgW - 20;
+                                        y = h - imgH - 20;
+                                    } else if (index === 2) {
+                                        // Bottom left corner
+                                        imgW = 180;
+                                        imgH = 90;
+                                        x = 20;
+                                        y = h - imgH - 20;
+                                    }
+                                    
+                                    // Draw background for sponsor logo
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                                    ctx.fillRect(x - 5, y - 5, imgW + 10, imgH + 10);
+                                    ctx.strokeStyle = 'rgba(0, 212, 255, 0.6)';
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeRect(x - 5, y - 5, imgW + 10, imgH + 10);
+                                    
+                                    // Draw sponsor image
+                                    ctx.drawImage(this, x, y, imgW, imgH);
+                                };
+                                img.onerror = function() {
+                                    // Fallback if image fails to load
+                                    let x, y, imgW, imgH;
+                                    
+                                    if (index === 0) {
+                                        imgW = 180; imgH = 90; x = w - imgW - 20; y = 20;
+                                    } else if (index === 1) {
+                                        imgW = 180; imgH = 90; x = w - imgW - 20; y = h - imgH - 20;
+                                    } else if (index === 2) {
+                                        imgW = 180; imgH = 90; x = 20; y = h - imgH - 20;
+                                    }
+                                    
+                                    ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+                                    ctx.fillRect(x, y, imgW, imgH);
+                                    ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeRect(x, y, imgW, imgH);
+                                    
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                                    ctx.font = '14px Arial';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText(`SPONSOR ${index + 1}`, x + imgW/2, y + imgH/2);
+                                };
+                                img.src = imgSrc;
+                            });
                         }
                     ]
                 }
@@ -2242,5 +2302,5 @@
         // Initialize default frame
         document.getElementById(currentFrame).classList.add('active');
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9935f00943b4893f',t:'MTc2MTI3MTgyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9935fa2ec4a5893f',t:'MTc2MTI3MjI0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
