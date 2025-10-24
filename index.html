@@ -295,6 +295,21 @@
             }
         }
 
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
         /* Frame 6: Sponsor */
         .frame-sponsor {
             background: rgba(0, 0, 0, 0.8);
@@ -540,6 +555,19 @@
                     <!-- Custom Frame -->
                     <div class="frame-overlay frame-custom" id="frame-custom"></div>
                 </div>
+                
+                <!-- Countdown Display (inside camera container) -->
+                <div id="countdownDisplay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; font-size: 4rem; font-weight: bold; color: #00d4ff; text-shadow: 0 0 30px rgba(0, 212, 255, 0.8); animation: pulse 1s infinite; z-index: 1000;">
+                    <!-- Countdown numbers will appear here -->
+                </div>
+                
+                <!-- Camera Control Buttons (moved below camera) -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <div style="display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                        <button class="btn btn-success" id="capturePhoto" style="display: none; width: auto; padding: 15px 30px;">📸 ถ่ายภาพ</button>
+                        <button class="btn btn-warning" id="timerCapture" style="display: none; width: auto; padding: 15px 30px;">⏰ ถ่ายด้วยจับเวลา (4วิ)</button>
+                    </div>
+                </div>
             </div>
 
             <div class="controls">
@@ -589,14 +617,14 @@
                 </div>
 
                 <button class="btn btn-primary" id="startCamera">📷 เปิดกล้อง</button>
-                <button class="btn btn-success" id="capturePhoto" style="display: none;">📸 ถ่ายภาพ</button>
             </div>
         </div>
 
         <div class="preview-section" id="previewSection" style="display: none;">
             <h3>ภาพที่ถ่าย</h3>
             <img id="preview" alt="ภาพที่ถ่าย">
-            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                <button class="btn btn-success" id="retakePhoto" style="display: none; width: auto; padding: 12px 30px;">📷 ถ่ายใหม่</button>
                 <button class="btn btn-warning" id="downloadPhoto" style="display: none; width: auto; padding: 12px 30px;">💾 ดาวน์โหลด PNG</button>
                 <button class="btn btn-info" id="sharePhoto" style="display: none; width: auto; padding: 12px 30px;">📤 แชร์ภาพ</button>
             </div>
@@ -625,10 +653,15 @@
         
         const startCameraBtn = document.getElementById('startCamera');
         const capturePhotoBtn = document.getElementById('capturePhoto');
+        const timerCaptureBtn = document.getElementById('timerCapture');
+        const countdownDisplay = document.getElementById('countdownDisplay');
         const downloadPhotoBtn = document.getElementById('downloadPhoto');
         const sharePhotoBtn = document.getElementById('sharePhoto');
+        const retakePhotoBtn = document.getElementById('retakePhoto');
         const customFrameInput = document.getElementById('customFrame');
         const customFrameBtn = document.getElementById('customFrameBtn');
+        
+        let countdownTimer = null;
         
         const nicknameInput = document.getElementById('nickname');
         const teamNameInput = document.getElementById('teamName');
@@ -707,6 +740,7 @@
                 
                 startCameraBtn.style.display = 'none';
                 capturePhotoBtn.style.display = 'block';
+                timerCaptureBtn.style.display = 'block';
                 
                 // Show default frame
                 document.getElementById(currentFrame).classList.add('active');
@@ -720,8 +754,8 @@
             }
         });
         
-        // Capture photo
-        capturePhotoBtn.addEventListener('click', function() {
+        // Capture photo function
+        function capturePhoto() {
             const nickname = nicknameInput.value.trim();
             const teamName = teamNameInput.value.trim();
             
@@ -756,11 +790,97 @@
             const imageDataUrl = canvas.toDataURL('image/png');
             preview.src = imageDataUrl;
             previewSection.style.display = 'block';
+            retakePhotoBtn.style.display = 'block';
             downloadPhotoBtn.style.display = 'block';
             sharePhotoBtn.style.display = 'block';
             
+            // Hide capture buttons and show retake option
+            capturePhotoBtn.style.display = 'none';
+            timerCaptureBtn.style.display = 'none';
+            
             // Scroll to preview
             previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Capture photo button
+        capturePhotoBtn.addEventListener('click', capturePhoto);
+        
+        // Timer capture button
+        timerCaptureBtn.addEventListener('click', function() {
+            const nickname = nicknameInput.value.trim();
+            const teamName = teamNameInput.value.trim();
+            
+            if (!nickname || !teamName) {
+                showCustomAlert('กรุณาใส่ชื่อเล่นและชื่อทีมก่อนถ่ายภาพ');
+                return;
+            }
+            
+            // Start countdown
+            startCountdown();
+        });
+        
+        // Countdown function
+        function startCountdown() {
+            let count = 4;
+            countdownDisplay.style.display = 'block';
+            countdownDisplay.textContent = count;
+            
+            // Disable buttons during countdown
+            capturePhotoBtn.disabled = true;
+            timerCaptureBtn.disabled = true;
+            capturePhotoBtn.style.opacity = '0.5';
+            timerCaptureBtn.style.opacity = '0.5';
+            
+            countdownTimer = setInterval(function() {
+                count--;
+                if (count > 0) {
+                    countdownDisplay.textContent = count;
+                } else {
+                    // Take photo
+                    countdownDisplay.textContent = '📸';
+                    setTimeout(function() {
+                        capturePhoto();
+                        
+                        // Hide countdown and re-enable buttons
+                        countdownDisplay.style.display = 'none';
+                        capturePhotoBtn.disabled = false;
+                        timerCaptureBtn.disabled = false;
+                        capturePhotoBtn.style.opacity = '1';
+                        timerCaptureBtn.style.opacity = '1';
+                        
+                        clearInterval(countdownTimer);
+                    }, 500);
+                }
+            }, 1000);
+        }
+        
+        // Retake photo
+        retakePhotoBtn.addEventListener('click', function() {
+            // Clear any running countdown
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            
+            // Hide preview section
+            previewSection.style.display = 'none';
+            retakePhotoBtn.style.display = 'none';
+            downloadPhotoBtn.style.display = 'none';
+            sharePhotoBtn.style.display = 'none';
+            countdownDisplay.style.display = 'none';
+            
+            // Show capture buttons again
+            capturePhotoBtn.style.display = 'block';
+            timerCaptureBtn.style.display = 'block';
+            
+            // Re-enable buttons
+            capturePhotoBtn.disabled = false;
+            timerCaptureBtn.disabled = false;
+            capturePhotoBtn.style.opacity = '1';
+            timerCaptureBtn.style.opacity = '1';
+            
+            // Scroll back to camera
+            document.querySelector('.camera-container').scrollIntoView({ behavior: 'smooth' });
         });
         
         // Download photo
@@ -1287,5 +1407,5 @@
         // Initialize default frame
         document.getElementById(currentFrame).classList.add('active');
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99327f00c51d26d5',t:'MTc2MTIzNTczOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9935dceb6202893f',t:'MTc2MTI3MTA0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
